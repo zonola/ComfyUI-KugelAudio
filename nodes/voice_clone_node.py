@@ -10,7 +10,6 @@ from .base_kugelaudio import (
     get_available_models,
     resolve_model_path,
     ATTENTION_OPTIONS,
-    SUPPORTED_LANGUAGES,
     INTERRUPTION_SUPPORT,
 )
 from .text_utils import split_text_into_chunks
@@ -71,10 +70,6 @@ class KugelAudioVoiceCloneNode(BaseKugelAudioNode):
                     "max": 4096,
                     "step": 256,
                     "tooltip": "Maximum tokens to generate. Increase for longer text.",
-                }),
-                "language": ([opt[0] for opt in SUPPORTED_LANGUAGES], {
-                    "default": "auto",
-                    "tooltip": "Optional language hint. Model auto-detects if set to Auto.",
                 }),
                 "keep_loaded": ("BOOLEAN", {
                     "default": True,
@@ -139,7 +134,6 @@ class KugelAudioVoiceCloneNode(BaseKugelAudioNode):
         use_4bit: bool,
         cfg_scale: float,
         max_new_tokens: int,
-        language: str,
         keep_loaded: bool,
         output_stereo: bool,
         device: str,
@@ -259,8 +253,17 @@ class KugelAudioVoiceCloneNode(BaseKugelAudioNode):
                 # Log completion
                 logger.info(f"Audio generated successfully")
 
-                # Extract audio - watermark applied only if single chunk
+                # Extract audio and add padding to prevent cutoff - watermark applied only if single chunk
                 chunk_audio = outputs.speech_outputs[0]
+                # Add 100ms padding at end of each chunk
+                logger.info(f"Adding silence at end of chunck")
+                sample_rate = 24000
+                chunk_padding = int(0.1 * sample_rate)
+                if chunk_audio.dim() == 1:
+                    chunk_silence = torch.zeros(chunk_padding, dtype=chunk_audio.dtype, device=chunk_audio.device)
+                else:
+                    chunk_silence = torch.zeros(chunk_audio.shape[0], chunk_padding, dtype=chunk_audio.dtype, device=chunk_audio.device)
+                chunk_audio = torch.cat([chunk_audio, chunk_silence], dim=-1)
                 audio_tensors.append(chunk_audio)
 
             # Finalize progress

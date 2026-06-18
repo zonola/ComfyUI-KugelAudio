@@ -173,6 +173,21 @@ class KugelAudioModel(KugelAudioPreTrainedModel):
             solver_order=2,
         )
 
+    def strip_encoders(self):
+        """Remove encoder weights from acoustic tokenizer to free VRAM.
+
+        Call this after loading the model to remove encoder components
+        that are not needed for inference with pre-encoded voices.
+        The acoustic decoder (for latent -> waveform) is kept.
+        """
+        if hasattr(self.acoustic_tokenizer, "encoder"):
+            del self.acoustic_tokenizer.encoder
+            self.acoustic_tokenizer.encoder = None
+
+        # Clear CUDA cache if available
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            
     def get_input_embeddings(self):
         if hasattr(self.language_model, "embed_tokens"):
             # If the language model has an embed_tokens attribute, return it

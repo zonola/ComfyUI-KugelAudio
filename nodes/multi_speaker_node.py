@@ -11,7 +11,6 @@ from .base_kugelaudio import (
     get_available_models,
     resolve_model_path,
     ATTENTION_OPTIONS,
-    SUPPORTED_LANGUAGES,
     INTERRUPTION_SUPPORT,
 )
 
@@ -79,10 +78,7 @@ class KugelAudioMultiSpeakerNode(BaseKugelAudioNode):
                     "step": 256,
                     "tooltip": "Maximum tokens per speaker line. Increase for longer lines.",
                 }),
-                "language": ([opt[0] for opt in SUPPORTED_LANGUAGES], {
-                    "default": "auto",
-                    "tooltip": "Optional language hint. Model auto-detects if set to Auto.",
-                }),
+
                 "keep_loaded": ("BOOLEAN", {
                     "default": True,
                     "tooltip": "Keep model in VRAM after generation. Disable to free memory (slower subsequent runs).",
@@ -161,7 +157,6 @@ class KugelAudioMultiSpeakerNode(BaseKugelAudioNode):
         use_4bit: bool,
         cfg_scale: float,
         max_new_tokens: int,
-        language: str,
         keep_loaded: bool,
         output_stereo: bool,
         device: str,

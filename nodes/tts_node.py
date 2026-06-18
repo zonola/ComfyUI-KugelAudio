@@ -10,7 +10,6 @@ from .base_kugelaudio import (
     get_available_models,
     resolve_model_path,
     ATTENTION_OPTIONS,
-    SUPPORTED_LANGUAGES,
     INTERRUPTION_SUPPORT,
 )
 from .text_utils import split_text_into_chunks
@@ -72,10 +71,6 @@ class KugelAudioTTSNode(BaseKugelAudioNode):
                     "step": 256,
                     "tooltip": "Maximum tokens to generate. Increase for longer text.",
                 }),
-                "language": ([opt[0] for opt in SUPPORTED_LANGUAGES], {
-                    "default": "auto",
-                    "tooltip": "Optional language hint. Model auto-detects if set to Auto.",
-                }),
                 "keep_loaded": ("BOOLEAN", {
                     "default": True,
                     "tooltip": "Keep model in VRAM after generation. Disable to free memory (slower subsequent runs).",
@@ -136,7 +131,6 @@ class KugelAudioTTSNode(BaseKugelAudioNode):
         use_4bit: bool,
         cfg_scale: float,
         max_new_tokens: int,
-        language: str,
         keep_loaded: bool,
         output_stereo: bool,
         device: str,
@@ -216,7 +210,7 @@ class KugelAudioTTSNode(BaseKugelAudioNode):
                 text_word_count = len(chunk.split())
                 estimated_tokens = int(text_word_count * 2.5)
                 logger.info(f"Generating audio (~{estimated_tokens} estimated tokens, max {max_new_tokens} allowed)...")
-                
+
                 # Generate (KugelAudio uses internal tqdm, we use stage-based progress)
                 # Disable watermark for individual chunks to avoid boundary artifacts (unless disabled by user)
                 watermark_enabled = (num_chunks == 1 and not disable_watermark)

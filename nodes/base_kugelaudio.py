@@ -18,6 +18,10 @@ logger = logging.getLogger("KugelAudio")
 
 # Disable torch.compile to avoid "Compiler: cl is not found" errors
 # This affects audioseal watermarking which uses torch.compile internally
+
+# Enable TF32 for faster computation on Ampere GPUs
+TORCH_ALLOW_TF32=1
+
 os.environ["TORCH_COMPILE_DISABLE"] = "1"
 os.environ["TORCHDYNAMO_DISABLE"] = "1"
 logger.debug("torch.compile disabled to avoid compiler dependency issues")
@@ -55,34 +59,6 @@ except ImportError:
 # Check if SageAttention is available
 # Import SageAttention patch (from ComfyUI-VibeVoice)
 from .sage_attention_patch import SAGE_ATTENTION_AVAILABLE, set_sage_attention
-
-# Supported languages
-SUPPORTED_LANGUAGES = [
-    ("auto", "Auto-detect"),
-    ("en", "English"),
-    ("de", "German"),
-    ("es", "Spanish"),
-    ("fr", "French"),
-    ("it", "Italian"),
-    ("pt", "Portuguese"),
-    ("nl", "Dutch"),
-    ("pl", "Polish"),
-    ("ru", "Russian"),
-    ("uk", "Ukrainian"),
-    ("cs", "Czech"),
-    ("ro", "Romanian"),
-    ("hu", "Hungarian"),
-    ("sv", "Swedish"),
-    ("da", "Danish"),
-    ("fi", "Finnish"),
-    ("no", "Norwegian"),
-    ("el", "Greek"),
-    ("bg", "Bulgarian"),
-    ("sk", "Slovak"),
-    ("hr", "Croatian"),
-    ("sr", "Serbian"),
-    ("tr", "Turkish"),
-]
 
 # Attention implementations - matching VibeVoice format
 ATTENTION_OPTIONS = [

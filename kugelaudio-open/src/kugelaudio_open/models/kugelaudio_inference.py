@@ -512,6 +512,9 @@ class KugelAudioForConditionalGenerationInference(KugelAudioPreTrainedModel, Gen
             # Apply token constraint
             logits = token_constraint(current_ids, logits)
 
+            # Penalize speech_end token to reduce premature stopping
+            logits[:, speech_end_id] -= 5.0
+
             # Sample or greedy decode
             if do_sample and temperature > 0:
                 probs = torch.softmax(logits / temperature, dim=-1)
